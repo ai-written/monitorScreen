@@ -1,0 +1,13 @@
+{
+  "name": "monitor-screen",
+  "outputfilename": "monitorScreen",
+  "iconfilename": "favicon.png",
+  "frontend:install": "npm install",
+  "frontend:build": "npm run build",
+  "frontend:dev:watcher": "npm run dev",
+  "frontend:dev:serverUrl": "http://localhost:5173",
+  "author": {
+    "name": "",
+    "email": ""
+  }
+}

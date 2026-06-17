@@ -1,0 +1,6 @@
+{
+    "RemoteWebServerEnabled": true,
+    "RemoteWebServerPort": 8085,
+    "MinimizeToTray": true,
+    "AutoUpdateEnabled": false
+}

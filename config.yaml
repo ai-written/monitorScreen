@@ -1,0 +1,7 @@
+collector:
+  interval: 1
+
+lhm:
+  enabled: "true"
+  bridge_exe: 'lhm\sensor_bridge.exe'
+  lhm_exe: 'lhm\LibreHardwareMonitor.exe'

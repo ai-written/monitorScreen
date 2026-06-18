@@ -331,6 +331,12 @@ func (a *App) buildDashboard() *model.DashboardData {
 	uptime := getRealUptime()
 	d.System.Uptime = formatUptime(uptime)
 
+	ip, disp, procs, threads := collector.CollectSysInfo()
+	d.System.IPAddress = ip
+	d.System.DisplayInfo = disp
+	d.System.ProcessCount = procs
+	d.System.ThreadCount = threads
+
 	if !a.cpuWarmedUp {
 		collector.CollectCPU(nil)
 		a.cpuWarmedUp = true
@@ -341,6 +347,13 @@ func (a *App) buildDashboard() *model.DashboardData {
 	d.GPU = collector.CollectGPU()
 	d.Memory = collector.CollectMemory()
 	d.Storage = collector.CollectStorage()
+
+	down, up := collector.CollectNetworkRate()
+	d.Network.DownloadMbps = down
+	d.Network.UploadMbps = up
+	d.Network.ConnectionCount = collector.CollectConnectionCount()
+
+	d.DiskIO = collector.CollectDiskIORate()
 
 	if a.cfg.LHM.Enabled == "true" {
 		bridgeExe := a.cfg.LHM.BridgeExe
@@ -388,6 +401,9 @@ func (a *App) runCollectors(ctx context.Context) {
 
 func (a *App) emitDashboard(ctx context.Context) {
 	db := a.buildDashboard()
+	log.Printf("emit dashboard: cpu=%.1f%% mem=%.1f/%1.f gpu=%.1f%% net=↓%.1f/↑%.1f",
+		db.CPU.Usage, db.Memory.UsedGB, db.Memory.TotalGB, db.GPU.Usage,
+		db.Network.DownloadMbps, db.Network.UploadMbps)
 
 	a.mu.Lock()
 	a.dashboard = db

@@ -1,9 +1,11 @@
 <template>
   <div class="metric-card">
-    <div class="metric-label">{{ label }}</div>
-    <div class="metric-value">
-      <span class="metric-num">{{ formattedValue }}</span>
-      <span class="metric-unit">{{ unit }}</span>
+    <div class="metric-row">
+      <span class="metric-label">{{ label }}</span>
+      <span class="metric-value">
+        <span class="metric-num">{{ formattedValue }}</span>
+        <span class="metric-unit">{{ unit }}</span>
+      </span>
     </div>
     <div class="progress-bar">
       <div class="progress-fill" :style="fillStyle"></div>
@@ -47,39 +49,47 @@ export default {
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.04);
   border-radius: 8px;
-  padding: 12px 14px;
+  padding: 8px 14px;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+}
+
+.metric-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
 }
 
 .metric-label {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-dim);
-  letter-spacing: 1.5px;
-  margin-bottom: 4px;
+  letter-spacing: 1px;
+  white-space: nowrap;
 }
 
 .metric-value {
   display: flex;
   align-items: baseline;
-  gap: 4px;
-  margin-bottom: 8px;
+  gap: 3px;
+  white-space: nowrap;
 }
 
 .metric-num {
-  font-size: 28px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--text-primary);
   line-height: 1;
 }
 
 .metric-unit {
-  font-size: 14px;
+  font-size: 12px;
   color: var(--text-secondary);
 }
 
 .progress-bar {
-  height: 4px;
+  height: 3px;
   background: rgba(255, 255, 255, 0.06);
   border-radius: 2px;
   overflow: hidden;

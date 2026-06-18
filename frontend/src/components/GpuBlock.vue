@@ -6,6 +6,12 @@
     <div class="gpu-model">{{ gpu.model || '--' }}</div>
     <div class="gpu-specs">
       <span>{{ gpu.vram_spec || '--' }}</span>
+      <span class="sep" v-if="gpu.vram_type">|</span>
+      <span v-if="gpu.vram_type">{{ gpu.vram_type }}</span>
+      <template v-if="gpu.mem_total > 0 && gpu.mem_used >= 0">
+        <span class="sep">|</span>
+        <span>{{ vramPct }}% 已用</span>
+      </template>
     </div>
     <div class="metrics-grid">
       <MetricCard label="GPU 温度" :value="gpu.temp" unit="°C" :max="100" bar-color="var(--purple)" :show-zero="false" />
@@ -19,10 +25,20 @@
 </template>
 
 <script>
+import { computed } from 'vue'
 import MetricCard from './MetricCard.vue'
 export default {
   components: { MetricCard },
-  props: { gpu: Object }
+  props: { gpu: Object },
+  setup(props) {
+    const vramPct = computed(() => {
+      if (props.gpu && props.gpu.mem_total > 0) {
+        return ((props.gpu.mem_used || 0) / props.gpu.mem_total * 100).toFixed(0)
+      }
+      return 0
+    })
+    return { vramPct }
+  }
 }
 </script>
 
@@ -60,7 +76,7 @@ export default {
 .metrics-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 6px;
   flex: 1;
 }
 </style>

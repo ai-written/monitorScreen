@@ -45,6 +45,51 @@ func enrichCPUBridge(output *BridgeOutput, d *model.CPUData) {
 	}
 
 	d.Power = findCPUValue(output, "power", "package", "cpu package", "cpu")
+
+	d.MBTemp = findMBTemp(output)
+	d.VRMTemp = findVRMTemp(output)
+}
+
+func findMBTemp(output *BridgeOutput) float64 {
+	for key, sensors := range *output {
+		lowerKey := strings.ToLower(key)
+		if !strings.Contains(lowerKey, "motherboard") {
+			continue
+		}
+		for _, s := range sensors {
+			if strings.Contains(strings.ToLower(s.Type), "temperature") && s.Value > 0 {
+				return s.Value
+			}
+		}
+	}
+	return 0
+}
+
+func findVRMTemp(output *BridgeOutput) float64 {
+	for key, sensors := range *output {
+		lowerKey := strings.ToLower(key)
+		if !strings.Contains(lowerKey, "motherboard") && !strings.Contains(lowerKey, "vrm") {
+			continue
+		}
+		for _, s := range sensors {
+			sn := strings.ToLower(s.Name)
+			st := strings.ToLower(s.Type)
+			if strings.Contains(st, "temperature") && (strings.Contains(sn, "vrm") || strings.Contains(sn, "mos")) && s.Value > 0 {
+				return s.Value
+			}
+		}
+	}
+	return 0
+}
+
+func findVRAMType(sensors []BridgeSensor) string {
+	for _, s := range sensors {
+		sn := strings.ToLower(s.Name)
+		if strings.Contains(sn, "memory type") || strings.Contains(sn, "vram type") {
+			return s.Name
+		}
+	}
+	return ""
 }
 
 func findCPUValue(output *BridgeOutput, sensorType string, names ...string) float64 {
@@ -140,6 +185,10 @@ func enrichGPUBridge(output *BridgeOutput, d *model.GPUData, cpuUsage float64) {
 			if len(parts) == 2 {
 				d.Model = strings.TrimSpace(parts[1])
 			}
+		}
+
+		if d.VRAMType == "" {
+			d.VRAMType = findVRAMType(sensors)
 		}
 	}
 }

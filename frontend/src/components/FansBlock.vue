@@ -41,9 +41,9 @@ export default {
   flex-direction: column;
 }
 
-.fan-block { border-top: 2px solid var(--pink); }
+.fan-block { border-top: 2px solid var(--pink); max-height: 240px; display: flex; flex-direction: column; }
 
-.block-header { margin-bottom: 10px; }
+.block-header { margin-bottom: 10px; flex-shrink: 0; }
 .block-title {
   font-size: 14px; font-weight: 700; color: var(--text-secondary);
   letter-spacing: 2px; display: flex; align-items: center; gap: 8px;
@@ -51,7 +51,14 @@ export default {
 .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 .fan-dot { background: var(--pink); }
 
-.fan-list { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.fan-list {
+  display: flex; flex-direction: column; gap: 10px; flex: 1;
+  overflow-y: auto; min-height: 0;
+  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+}
+.fan-list::-webkit-scrollbar { width: 4px; }
+.fan-list::-webkit-scrollbar-track { background: transparent; }
+.fan-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 .fan-empty { color: var(--text-dim); font-size: 14px; text-align: center; padding: 20px 0; }
 
 .fan-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }

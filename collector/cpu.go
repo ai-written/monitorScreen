@@ -22,6 +22,14 @@ func CollectCPU(prevUsage *float64) model.CPUData {
 		} else if mhz > 0 {
 			d.MaxFreq = fmt.Sprintf("%.0f MHz", mhz)
 		}
+		if info[0].CacheSize > 0 {
+			cacheKB := info[0].CacheSize
+			if cacheKB >= 1024 {
+				d.CacheL3 = fmt.Sprintf("%.0f MB", float64(cacheKB)/1024)
+			} else {
+				d.CacheL3 = fmt.Sprintf("%d KB", cacheKB)
+			}
+		}
 	}
 
 	physical, _ := cpu.Counts(false)
@@ -36,6 +44,11 @@ func CollectCPU(prevUsage *float64) model.CPUData {
 		if prevUsage != nil {
 			*prevUsage = d.Usage
 		}
+	}
+
+	perCore, err := cpu.Percent(0, true)
+	if err == nil && len(perCore) > 0 {
+		d.PerCoreUsage = perCore
 	}
 
 	return d

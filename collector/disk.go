@@ -1,10 +1,23 @@
 package collector
 
 import (
+	"sync"
+	"time"
+
 	"github.com/shirou/gopsutil/v3/disk"
 
 	"monitor-screen/model"
 )
+
+var (
+	diskIOMu       sync.Mutex
+	lastDiskBytes  = make(map[string]ioCounters)
+	lastDiskTime   time.Time
+	cachedDiskDown float64
+	cachedDiskUp   float64
+)
+
+type ioCounters struct{ read, write uint64 }
 
 func CollectStorage() []model.StorageDrive {
 	var drives []model.StorageDrive
@@ -51,4 +64,43 @@ func enrichDiskBrands(drives []model.StorageDrive) {
 			}
 		}
 	}
+}
+
+func CollectDiskIORate() model.DiskIOData {
+	diskIOMu.Lock()
+	defer diskIOMu.Unlock()
+
+	counters, err := disk.IOCounters()
+	if err != nil {
+		return model.DiskIOData{ReadMBps: cachedDiskDown, WriteMBps: cachedDiskUp}
+	}
+
+	now := time.Now()
+	current := make(map[string]ioCounters)
+	var totalRead, totalWrite uint64
+
+	for name, c := range counters {
+		current[name] = ioCounters{c.ReadBytes, c.WriteBytes}
+		totalRead += c.ReadBytes
+		totalWrite += c.WriteBytes
+	}
+
+	if len(lastDiskBytes) > 0 && !lastDiskTime.IsZero() {
+		elapsed := now.Sub(lastDiskTime).Seconds()
+		if elapsed >= 0.5 {
+			var diffRead, diffWrite uint64
+			for name, cur := range current {
+				if prev, ok := lastDiskBytes[name]; ok {
+					diffRead += cur.read - prev.read
+					diffWrite += cur.write - prev.write
+				}
+			}
+			cachedDiskDown = float64(diffRead) / elapsed / (1024 * 1024)
+			cachedDiskUp = float64(diffWrite) / elapsed / (1024 * 1024)
+		}
+	}
+
+	lastDiskBytes = current
+	lastDiskTime = now
+	return model.DiskIOData{ReadMBps: cachedDiskDown, WriteMBps: cachedDiskUp}
 }

@@ -1,13 +1,13 @@
 <template>
   <div class="app" @keydown.esc="onEsc" tabindex="0">
-    <TopBar :system="data.system" :cpu="data.cpu" :gpu="data.gpu" :memory="data.memory" :total-power="data.total_power" />
+    <TopBar :system="data.system" :cpu="data.cpu" :gpu="data.gpu" :memory="data.memory" :total-power="data.total_power" :network="data.network" />
     <div class="main-grid">
       <CpuBlock :cpu="data.cpu" />
       <GpuBlock :gpu="data.gpu" />
     </div>
     <div class="bottom-grid">
       <MemoryBlock :memory="data.memory" />
-      <StorageBlock :storage="data.storage" />
+      <StorageBlock :storage="data.storage" :disk-i-o="data.disk_io" />
       <FansBlock :fans="data.fans" />
     </div>
     <div class="overlay-btns">
@@ -41,18 +41,42 @@ export default {
   components: { TopBar, CpuBlock, GpuBlock, MemoryBlock, StorageBlock, FansBlock },
   setup() {
     const data = reactive({
-      system: { time: '--:--:--', date: '----/--/--', uptime: '--' },
-      cpu: { model: '', max_freq: '', cores_threads: '', package_temp: 0, usage: 0, clock_speed: 0, vcore: 0, fan_speed: 0, power: 0 },
-      gpu: { model: '', vram_spec: '', pcie_version: '', temp: 0, usage: 0, clock: 0, mem_used: 0, mem_total: 0, fan_speed: 0, power: 0 },
+      system: { time: '--:--:--', date: '----/--/--', uptime: '--', process_count: 0, thread_count: 0, ip_address: '', display_info: '', fps: 0 },
+      cpu: { model: '', max_freq: '', cores_threads: '', package_temp: 0, usage: 0, clock_speed: 0, vcore: 0, fan_speed: 0, power: 0, per_core_usage: [], mb_temp: 0, vrm_temp: 0 },
+      gpu: { model: '', vram_spec: '', vram_type: '', pcie_version: '', temp: 0, usage: 0, clock: 0, mem_used: 0, mem_total: 0, fan_speed: 0, power: 0 },
       memory: { used_gb: 0, total_gb: 0, type: '', frequency: '', channel: '', brand: '' },
       storage: [],
       fans: [],
-      total_power: 0
+      total_power: 0,
+      network: { download_mbps: 0, upload_mbps: 0, connection_count: 0 },
+      disk_io: { read_mbps: 0, write_mbps: 0 }
     })
 
     const fullscreen = ref(true)
     let eventCleanup = null
     let clockTimer = null
+    let fpsTimer = null
+    let fpsFrames = 0
+
+    function mergeSystem(sys) {
+      if (sys.uptime !== undefined) data.system.uptime = sys.uptime
+      if (sys.process_count !== undefined) data.system.process_count = sys.process_count
+      if (sys.ip_address !== undefined) data.system.ip_address = sys.ip_address
+      if (sys.display_info !== undefined) data.system.display_info = sys.display_info
+    }
+
+    function startFpsTracker() {
+      fpsFrames = 0
+      const tick = () => {
+        fpsFrames++
+        requestAnimationFrame(tick)
+      }
+      requestAnimationFrame(tick)
+      fpsTimer = setInterval(() => {
+        data.system.fps = fpsFrames
+        fpsFrames = 0
+      }, 1000)
+    }
 
     function updateClock() {
       const now = new Date()
@@ -70,31 +94,27 @@ export default {
     onMounted(async () => {
       updateClock()
       clockTimer = setInterval(updateClock, 1000)
+      if (window.runtime) startFpsTracker()
 
       try {
         const d = await window.go.main.App.GetDashboard()
         if (d) {
-          if (d.system) {
-            data.system.uptime = d.system.uptime
-            delete d.system
-          }
+          if (d.system) { mergeSystem(d.system); delete d.system }
           Object.assign(data, d)
         }
         fullscreen.value = await window.go.main.App.GetIsFullscreen()
-      } catch (e) { console.error(e) }
+      } catch (e) { console.error('initial dashboard error:', e) }
 
       if (window.runtime) {
         eventCleanup = window.runtime.EventsOn('dashboard-update', (raw) => {
           try {
             const d = typeof raw === 'string' ? JSON.parse(raw) : raw
             if (d) {
-              if (d.system) {
-                data.system.uptime = d.system.uptime
-                delete d.system
-              }
+              console.log('dashboard event, cpu usage:', d.cpu?.usage)
+              if (d.system) { mergeSystem(d.system); delete d.system }
               Object.assign(data, d)
             }
-          } catch (e) { /* ignore */ }
+          } catch (e) { console.error('dashboard event error:', e) }
         })
       }
 
@@ -103,6 +123,7 @@ export default {
 
     onUnmounted(() => {
       if (clockTimer) clearInterval(clockTimer)
+      if (fpsTimer) clearInterval(fpsTimer)
       if (eventCleanup) eventCleanup()
       document.removeEventListener('keydown', handleKey)
     })

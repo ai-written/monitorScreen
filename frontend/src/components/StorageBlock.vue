@@ -17,12 +17,19 @@
         </div>
       </div>
     </div>
+    <div class="disk-io" v-if="diskIO && (diskIO.read_mbps > 0 || diskIO.write_mbps > 0)">
+      <div class="io-row">
+        <span class="io-label">磁盘 IO</span>
+        <span class="io-val io-read">R {{ fmt(diskIO.read_mbps) }} MB/s</span>
+        <span class="io-val io-write">W {{ fmt(diskIO.write_mbps) }} MB/s</span>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 export default {
-  props: { storage: Array },
+  props: { storage: Array, diskIO: Object },
   methods: {
     fmt(v) { return typeof v === 'number' ? v.toFixed(1) : '--' },
     drvPct(d) { return d.total_gb > 0 ? (d.used_gb / d.total_gb) * 100 : 0 },
@@ -45,9 +52,9 @@ export default {
   flex-direction: column;
 }
 
-.stor-block { border-top: 2px solid var(--amber); }
+.stor-block { border-top: 2px solid var(--amber); max-height: 240px; display: flex; flex-direction: column; }
 
-.block-header { margin-bottom: 8px; }
+.block-header { margin-bottom: 8px; flex-shrink: 0; }
 .block-title {
   font-size: 14px; font-weight: 700; color: var(--text-secondary);
   letter-spacing: 2px; display: flex; align-items: center; gap: 8px;
@@ -55,7 +62,14 @@ export default {
 .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 .stor-dot { background: var(--amber); }
 
-.stor-list { display: flex; flex-direction: column; gap: 12px; flex: 1; }
+.stor-list {
+  display: flex; flex-direction: column; gap: 10px; flex: 1;
+  overflow-y: auto; min-height: 0;
+  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+}
+.stor-list::-webkit-scrollbar { width: 4px; }
+.stor-list::-webkit-scrollbar-track { background: transparent; }
+.stor-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 .stor-empty { color: var(--text-dim); font-size: 14px; text-align: center; padding: 20px 0; }
 
 .stor-item { }
@@ -80,4 +94,24 @@ export default {
 }
 .progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
 .stor-fill { background: linear-gradient(90deg, var(--amber), #fbbf24); }
+
+.disk-io {
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.io-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+}
+.io-label {
+  color: var(--text-dim);
+  letter-spacing: 1px;
+}
+.io-val { font-weight: 600; }
+.io-read { color: var(--blue); }
+.io-write { color: var(--amber); }
 </style>

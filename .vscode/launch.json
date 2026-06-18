@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch (F5)",
+            "type": "go",
+            "request": "launch",
+            "mode": "exec",
+            "program": "${workspaceFolder}\\build\\bin\\monitorScreen.exe",
+            "cwd": "${workspaceFolder}\\build\\bin"
+        }
+    ]
+}

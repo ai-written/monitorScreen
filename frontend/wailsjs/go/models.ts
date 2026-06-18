@@ -4,12 +4,16 @@ export namespace model {
 	    model: string;
 	    max_freq: string;
 	    cores_threads: string;
+	    cache_l3: string;
 	    package_temp: number;
 	    usage: number;
 	    clock_speed: number;
 	    vcore: number;
 	    fan_speed: number;
 	    power: number;
+	    per_core_usage: number[];
+	    mb_temp: number;
+	    vrm_temp: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new CPUData(source);
@@ -20,12 +24,46 @@ export namespace model {
 	        this.model = source["model"];
 	        this.max_freq = source["max_freq"];
 	        this.cores_threads = source["cores_threads"];
+	        this.cache_l3 = source["cache_l3"];
 	        this.package_temp = source["package_temp"];
 	        this.usage = source["usage"];
 	        this.clock_speed = source["clock_speed"];
 	        this.vcore = source["vcore"];
 	        this.fan_speed = source["fan_speed"];
 	        this.power = source["power"];
+	        this.per_core_usage = source["per_core_usage"];
+	        this.mb_temp = source["mb_temp"];
+	        this.vrm_temp = source["vrm_temp"];
+	    }
+	}
+	export class DiskIOData {
+	    read_mbps: number;
+	    write_mbps: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new DiskIOData(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.read_mbps = source["read_mbps"];
+	        this.write_mbps = source["write_mbps"];
+	    }
+	}
+	export class NetworkData {
+	    download_mbps: number;
+	    upload_mbps: number;
+	    connection_count: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new NetworkData(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.download_mbps = source["download_mbps"];
+	        this.upload_mbps = source["upload_mbps"];
+	        this.connection_count = source["connection_count"];
 	    }
 	}
 	export class FanInfo {
@@ -89,6 +127,7 @@ export namespace model {
 	export class GPUData {
 	    model: string;
 	    vram_spec: string;
+	    vram_type: string;
 	    pcie_version: string;
 	    temp: number;
 	    usage: number;
@@ -106,6 +145,7 @@ export namespace model {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.model = source["model"];
 	        this.vram_spec = source["vram_spec"];
+	        this.vram_type = source["vram_type"];
 	        this.pcie_version = source["pcie_version"];
 	        this.temp = source["temp"];
 	        this.usage = source["usage"];
@@ -120,6 +160,10 @@ export namespace model {
 	    time: string;
 	    date: string;
 	    uptime: string;
+	    process_count: number;
+	    thread_count: number;
+	    ip_address: string;
+	    display_info: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new SystemInfo(source);
@@ -130,6 +174,10 @@ export namespace model {
 	        this.time = source["time"];
 	        this.date = source["date"];
 	        this.uptime = source["uptime"];
+	        this.process_count = source["process_count"];
+	        this.thread_count = source["thread_count"];
+	        this.ip_address = source["ip_address"];
+	        this.display_info = source["display_info"];
 	    }
 	}
 	export class DashboardData {
@@ -140,6 +188,8 @@ export namespace model {
 	    storage: StorageDrive[];
 	    fans: FanInfo[];
 	    total_power: number;
+	    network: NetworkData;
+	    disk_io: DiskIOData;
 	
 	    static createFrom(source: any = {}) {
 	        return new DashboardData(source);
@@ -154,6 +204,8 @@ export namespace model {
 	        this.storage = this.convertValues(source["storage"], StorageDrive);
 	        this.fans = this.convertValues(source["fans"], FanInfo);
 	        this.total_power = source["total_power"];
+	        this.network = this.convertValues(source["network"], NetworkData);
+	        this.disk_io = this.convertValues(source["disk_io"], DiskIOData);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -174,6 +226,8 @@ export namespace model {
 		    return a;
 		}
 	}
+	
+	
 	
 	
 	

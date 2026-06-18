@@ -10,12 +10,12 @@
       <span>{{ cpu.cores_threads || '--' }}</span>
     </div>
     <div class="metrics-grid">
-      <MetricCard label="PACKAGE TEMP" :value="cpu.package_temp" unit="°C" :max="100" bar-color="var(--cyan)" :show-zero="false" />
-      <MetricCard label="CPU USAGE" :value="cpu.usage" unit="%" :max="100" bar-color="var(--cyan)" />
-      <MetricCard label="CLOCK SPEED" :value="cpu.clock_speed" unit="MHz" :max="6000" bar-color="var(--cyan)" />
-      <MetricCard label="VCORE" :value="cpu.vcore" unit="V" :max="2" bar-color="var(--cyan)" :decimals="3" :show-zero="false" />
-      <MetricCard label="FAN SPEED" :value="cpu.fan_speed" unit="RPM" :max="2000" bar-color="var(--cyan)" :show-zero="false" />
-      <MetricCard label="POWER" :value="cpu.power" unit="W" :max="200" bar-color="var(--cyan)" :show-zero="false" />
+      <MetricCard label="封装温度" :value="cpu.package_temp" unit="°C" :max="100" bar-color="var(--cyan)" :show-zero="false" />
+      <MetricCard label="CPU 使用率" :value="cpu.usage" unit="%" :max="100" bar-color="var(--cyan)" />
+      <MetricCard label="主频" :value="cpu.clock_speed" unit="MHz" :max="6000" bar-color="var(--cyan)" />
+      <MetricCard label="核心电压" :value="cpu.vcore" unit="V" :max="2" bar-color="var(--cyan)" :decimals="3" :show-zero="false" />
+      <MetricCard label="风扇转速" :value="cpu.fan_speed" unit="RPM" :max="2000" bar-color="var(--cyan)" :show-zero="false" />
+      <MetricCard label="功耗" :value="cpu.power" unit="W" :max="200" bar-color="var(--cyan)" :show-zero="false" />
     </div>
   </div>
 </template>
@@ -33,7 +33,7 @@ export default {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 16px 18px;
+  padding: 18px 20px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -43,20 +43,20 @@ export default {
 
 .block-header { margin-bottom: 8px; }
 .block-title {
-  font-size: 12px; font-weight: 700; color: var(--text-secondary);
+  font-size: 14px; font-weight: 700; color: var(--text-secondary);
   letter-spacing: 2px; display: flex; align-items: center; gap: 8px;
 }
 .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 .cpu-dot { background: var(--cyan); }
 
 .cpu-model {
-  font-size: 15px; font-weight: 600; color: var(--text-primary);
+  font-size: 17px; font-weight: 600; color: var(--text-primary);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   margin-bottom: 4px;
 }
 
 .cpu-specs {
-  font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;
+  font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;
 }
 .sep { margin: 0 8px; color: var(--text-dim); }
 

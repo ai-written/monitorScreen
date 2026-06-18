@@ -8,12 +8,12 @@
       <span>{{ gpu.vram_spec || '--' }}</span>
     </div>
     <div class="metrics-grid">
-      <MetricCard label="GPU TEMP" :value="gpu.temp" unit="°C" :max="100" bar-color="var(--purple)" :show-zero="false" />
-      <MetricCard label="GPU USAGE" :value="gpu.usage" unit="%" :max="100" bar-color="var(--purple)" />
-      <MetricCard label="GPU CLOCK" :value="gpu.clock" unit="MHz" :max="3000" bar-color="var(--purple)" :show-zero="false" />
-      <MetricCard label="MEM USED" :value="gpu.mem_used" unit="MB" :max="gpu.mem_total || 16000" bar-color="var(--purple)" :show-zero="false" />
-      <MetricCard label="FAN SPEED" :value="gpu.fan_speed" unit="RPM" :max="3000" bar-color="var(--purple)" :show-zero="false" />
-      <MetricCard label="POWER" :value="gpu.power" unit="W" :max="300" bar-color="var(--purple)" :show-zero="false" />
+      <MetricCard label="GPU 温度" :value="gpu.temp" unit="°C" :max="100" bar-color="var(--purple)" :show-zero="false" />
+      <MetricCard label="GPU 使用率" :value="gpu.usage" unit="%" :max="100" bar-color="var(--purple)" />
+      <MetricCard label="GPU 频率" :value="gpu.clock" unit="MHz" :max="3000" bar-color="var(--purple)" :show-zero="false" />
+      <MetricCard label="显存已用" :value="gpu.mem_used" unit="MB" :max="gpu.mem_total || 16000" bar-color="var(--purple)" :show-zero="false" />
+      <MetricCard label="风扇转速" :value="gpu.fan_speed" unit="RPM" :max="3000" bar-color="var(--purple)" :show-zero="false" />
+      <MetricCard label="功耗" :value="gpu.power" unit="W" :max="300" bar-color="var(--purple)" :show-zero="false" />
     </div>
   </div>
 </template>
@@ -31,7 +31,7 @@ export default {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 16px 18px;
+  padding: 18px 20px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -41,20 +41,20 @@ export default {
 
 .block-header { margin-bottom: 8px; }
 .block-title {
-  font-size: 12px; font-weight: 700; color: var(--text-secondary);
+  font-size: 14px; font-weight: 700; color: var(--text-secondary);
   letter-spacing: 2px; display: flex; align-items: center; gap: 8px;
 }
 .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 .gpu-dot { background: var(--purple); }
 
 .gpu-model {
-  font-size: 15px; font-weight: 600; color: var(--text-primary);
+  font-size: 17px; font-weight: 600; color: var(--text-primary);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   margin-bottom: 4px;
 }
 
 .gpu-specs {
-  font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;
+  font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;
 }
 
 .metrics-grid {

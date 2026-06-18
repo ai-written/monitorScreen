@@ -39,7 +39,7 @@ func EnsureDriverLoaded(lhmExe string) {
 	cmd := exec.Command(lhmExe)
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	cmd.Start()
-	time.Sleep(3 * time.Second)
+	time.Sleep(1500 * time.Millisecond)
 	cmd.Process.Kill()
 }
 
@@ -60,17 +60,28 @@ func StartBridge(exePath string) {
 		return
 	}
 	bridgeProcess = cmd.Process
-	time.Sleep(2 * time.Second)
+	time.Sleep(1 * time.Second)
 }
 
 func StopBridge() {
 	if bridgeProcess != nil {
 		pid := bridgeProcess.Pid
 		bridgeProcess = nil
-		cmd := exec.Command("taskkill", "/F", "/T", "/PID", fmt.Sprintf("%d", pid))
-		cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
-		cmd.Run()
+		killPID(pid)
 	}
+	killByName("sensor_bridge.exe")
+}
+
+func killPID(pid int) {
+	cmd := exec.Command("taskkill", "/F", "/T", "/PID", fmt.Sprintf("%d", pid))
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+	cmd.Run()
+}
+
+func killByName(name string) {
+	cmd := exec.Command("taskkill", "/F", "/IM", name)
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+	cmd.Run()
 }
 
 func RunSensorBridge(exePath string) *BridgeOutput {
@@ -82,6 +93,11 @@ func RunSensorBridge(exePath string) *BridgeOutput {
 		if exe, err := os.Executable(); err == nil {
 			exePath = filepath.Join(filepath.Dir(exe), exePath)
 		}
+	}
+
+	if bridgeProcess != nil {
+		killPID(bridgeProcess.Pid)
+		bridgeProcess = nil
 	}
 
 	log.Printf("bridge: starting %s", exePath)
@@ -115,6 +131,13 @@ func isBridgeAlive() bool {
 	io.ReadAll(resp.Body)
 	resp.Body.Close()
 	return true
+}
+
+func QueryBridgeIfAlive(exePath string) *BridgeOutput {
+	if bridgeProcess == nil || !isBridgeAlive() {
+		return nil
+	}
+	return queryBridge()
 }
 
 func queryBridge() *BridgeOutput {

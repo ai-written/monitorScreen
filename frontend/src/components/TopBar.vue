@@ -24,6 +24,11 @@
         <span class="stat-value" :class="barColor(memPct)">{{ fmt(memPct) }}%</span>
         <div class="mini-bar"><div class="mini-fill" :style="{ width: memPct + '%', background: barColor(memPct) }"></div></div>
       </div>
+      <div class="stat-item">
+        <span class="stat-label">功耗</span>
+        <span class="stat-value pwr-val">{{ pwrDisplay }}<span class="pwr-unit">W</span></span>
+        <div class="mini-bar"><div class="mini-fill pwr-fill" :style="{ width: pwrPct + '%' }"></div></div>
+      </div>
     </div>
   </div>
 </template>
@@ -32,7 +37,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 export default {
-  props: { system: Object, cpu: Object, gpu: Object, memory: Object },
+  props: { system: Object, cpu: Object, gpu: Object, memory: Object, totalPower: { type: Number, default: 0 } },
   setup(props) {
     const topbar = ref(null)
     let dragging = false
@@ -45,6 +50,9 @@ export default {
       }
       return 0
     })
+
+    const pwrDisplay = computed(() => (props.totalPower || 0).toFixed(0))
+    const pwrPct = computed(() => Math.min(((props.totalPower || 0) / 500) * 100, 100))
 
     function fmt(v) { return typeof v === 'number' ? v.toFixed(1) : '--' }
     function barColor(v) {
@@ -96,7 +104,7 @@ export default {
       }
     })
 
-    return { topbar, memPct, fmt, barColor }
+    return { topbar, memPct, pwrDisplay, pwrPct, fmt, barColor }
   }
 }
 </script>
@@ -109,28 +117,31 @@ export default {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 14px 24px;
+  padding: 16px 26px;
   flex-shrink: 0;
   cursor: grab;
   user-select: none;
   -webkit-user-select: none;
 }
 
-.clock { font-size: 32px; font-weight: 700; letter-spacing: 2px; color: var(--cyan); }
-.date { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+.clock { font-size: 36px; font-weight: 700; letter-spacing: 2px; color: var(--cyan); }
+.date { font-size: 14px; color: var(--text-secondary); margin-top: 2px; }
 
 .topbar-center { text-align: center; }
-.uptime-label { font-size: 10px; color: var(--text-dim); letter-spacing: 2px; margin-bottom: 2px; }
-.uptime-value { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+.uptime-label { font-size: 11px; color: var(--text-dim); letter-spacing: 2px; margin-bottom: 2px; }
+.uptime-value { font-size: 18px; font-weight: 600; color: var(--text-primary); }
 
 .topbar-right { display: flex; gap: 24px; }
 .stat-item { text-align: center; }
-.stat-label { font-size: 10px; color: var(--text-dim); display: block; letter-spacing: 1px; }
-.stat-value { font-size: 18px; font-weight: 700; display: block; }
+.stat-label { font-size: 11px; color: var(--text-dim); display: block; letter-spacing: 1px; }
+.stat-value { font-size: 20px; font-weight: 700; display: block; }
 
 .mini-bar {
   width: 48px; height: 3px; background: var(--border); border-radius: 2px;
   margin-top: 4px; overflow: hidden;
 }
 .mini-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
+.pwr-val { color: var(--amber); font-size: 20px; white-space: nowrap; }
+.pwr-unit { font-size: 13px; opacity: 0.7; }
+.pwr-fill { background: linear-gradient(90deg, var(--amber), #fbbf24); }
 </style>

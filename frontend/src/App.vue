@@ -1,6 +1,6 @@
 <template>
   <div class="app" @keydown.esc="onEsc" tabindex="0">
-    <TopBar :system="data.system" :cpu="data.cpu" :gpu="data.gpu" :memory="data.memory" />
+    <TopBar :system="data.system" :cpu="data.cpu" :gpu="data.gpu" :memory="data.memory" :total-power="data.total_power" />
     <div class="main-grid">
       <CpuBlock :cpu="data.cpu" />
       <GpuBlock :gpu="data.gpu" />
@@ -46,7 +46,8 @@ export default {
       gpu: { model: '', vram_spec: '', pcie_version: '', temp: 0, usage: 0, clock: 0, mem_used: 0, mem_total: 0, fan_speed: 0, power: 0 },
       memory: { used_gb: 0, total_gb: 0, type: '', frequency: '', channel: '', brand: '' },
       storage: [],
-      fans: []
+      fans: [],
+      total_power: 0
     })
 
     const fullscreen = ref(true)
@@ -135,14 +136,14 @@ export default {
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 10px 14px;
-  gap: 8px;
+  padding: 12px 16px;
+  gap: 10px;
 }
 
 .main-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 10px;
   flex: 1;
   min-height: 0;
 }
@@ -150,7 +151,7 @@ export default {
 .bottom-grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 8px;
+  gap: 10px;
   flex-shrink: 0;
 }
 

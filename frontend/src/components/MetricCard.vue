@@ -47,17 +47,16 @@ export default {
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.04);
   border-radius: 8px;
-  padding: 10px 12px;
+  padding: 12px 14px;
   display: flex;
   flex-direction: column;
 }
 
 .metric-label {
-  font-size: 9px;
+  font-size: 11px;
   color: var(--text-dim);
   letter-spacing: 1.5px;
   margin-bottom: 4px;
-  text-transform: uppercase;
 }
 
 .metric-value {
@@ -68,14 +67,14 @@ export default {
 }
 
 .metric-num {
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 700;
   color: var(--text-primary);
   line-height: 1;
 }
 
 .metric-unit {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-secondary);
 }
 

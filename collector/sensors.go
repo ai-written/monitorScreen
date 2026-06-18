@@ -222,6 +222,21 @@ func collectFansBridge(output *BridgeOutput) []model.FanInfo {
 	return fans
 }
 
+func TotalPowerFromLHM(bridgeOutput *BridgeOutput) float64 {
+	if bridgeOutput == nil {
+		return 0
+	}
+	var total float64
+	for _, sensors := range *bridgeOutput {
+		for _, s := range sensors {
+			if strings.Contains(strings.ToLower(s.Type), "power") && s.Value > 0 {
+				total += s.Value
+			}
+		}
+	}
+	return total
+}
+
 func findAnyFan(output *BridgeOutput) float64 {
 	for _, sensors := range *output {
 		for _, s := range sensors {

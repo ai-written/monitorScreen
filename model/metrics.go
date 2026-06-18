@@ -23,12 +23,13 @@ type LHMConfig struct {
 }
 
 type DashboardData struct {
-	System  SystemInfo     `json:"system"`
-	CPU     CPUData        `json:"cpu"`
-	GPU     GPUData        `json:"gpu"`
-	Memory  MemoryData     `json:"memory"`
-	Storage []StorageDrive `json:"storage"`
-	Fans    []FanInfo      `json:"fans"`
+	System     SystemInfo     `json:"system"`
+	CPU        CPUData        `json:"cpu"`
+	GPU        GPUData        `json:"gpu"`
+	Memory     MemoryData     `json:"memory"`
+	Storage    []StorageDrive `json:"storage"`
+	Fans       []FanInfo      `json:"fans"`
+	TotalPower float64        `json:"total_power"`
 }
 
 type SystemInfo struct {

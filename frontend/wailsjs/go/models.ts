@@ -139,6 +139,7 @@ export namespace model {
 	    memory: MemoryData;
 	    storage: StorageDrive[];
 	    fans: FanInfo[];
+	    total_power: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new DashboardData(source);
@@ -152,6 +153,7 @@ export namespace model {
 	        this.memory = this.convertValues(source["memory"], MemoryData);
 	        this.storage = this.convertValues(source["storage"], StorageDrive);
 	        this.fans = this.convertValues(source["fans"], FanInfo);
+	        this.total_power = source["total_power"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

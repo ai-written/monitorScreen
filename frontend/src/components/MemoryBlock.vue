@@ -1,7 +1,7 @@
 <template>
   <div class="block mem-block">
     <div class="block-header">
-      <div class="block-title"><span class="dot mem-dot"></span> MEMORY</div>
+      <div class="block-title"><span class="dot mem-dot"></span> 内存</div>
     </div>
     <div v-if="memory.brand" class="mem-brand">{{ memory.brand }}</div>
     <div class="mem-main">
@@ -41,7 +41,7 @@ export default {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 16px 18px;
+  padding: 18px 20px;
   display: flex;
   flex-direction: column;
 }
@@ -50,22 +50,22 @@ export default {
 
 .block-header { margin-bottom: 4px; }
 .block-title {
-  font-size: 12px; font-weight: 700; color: var(--text-secondary);
+  font-size: 14px; font-weight: 700; color: var(--text-secondary);
   letter-spacing: 2px; display: flex; align-items: center; gap: 8px;
 }
 .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 .mem-dot { background: var(--green); }
 
 .mem-brand {
-  font-size: 11px; color: var(--text-dim);
+  font-size: 12px; color: var(--text-dim);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   margin-bottom: 8px;
 }
 
 .mem-main { display: flex; align-items: baseline; gap: 6px; margin-bottom: 10px; }
-.mem-used { font-size: 30px; font-weight: 700; color: var(--green); }
-.mem-unit { font-size: 18px; color: var(--green); }
-.mem-total { font-size: 16px; color: var(--text-secondary); }
+.mem-used { font-size: 34px; font-weight: 700; color: var(--green); }
+.mem-unit { font-size: 20px; color: var(--green); }
+.mem-total { font-size: 18px; color: var(--text-secondary); }
 
 .progress-bar {
   height: 8px; background: var(--border); border-radius: 4px;
@@ -76,7 +76,7 @@ export default {
 
 .mem-specs { display: flex; gap: 8px; margin-top: auto; flex-wrap: wrap; }
 .spec {
-  font-size: 12px; color: var(--text-secondary);
+  font-size: 13px; color: var(--text-secondary);
   background: var(--green-dim); padding: 3px 10px; border-radius: 6px;
 }
 </style>

@@ -29,14 +29,50 @@ var (
 	user32DLL                    = syscall.NewLazyDLL("user32.dll")
 	procGetCursorPos             = user32DLL.NewProc("GetCursorPos")
 	procGetWindowRect            = user32DLL.NewProc("GetWindowRect")
-	procSetWindowPos              = user32DLL.NewProc("SetWindowPos")
-	procFindWindowW               = user32DLL.NewProc("FindWindowW")
-	procSendMessageW              = user32DLL.NewProc("SendMessageW")
+	procSetWindowPos             = user32DLL.NewProc("SetWindowPos")
+	procFindWindowW              = user32DLL.NewProc("FindWindowW")
+	procSendMessageW             = user32DLL.NewProc("SendMessageW")
 	procCreateIconFromResourceEx = user32DLL.NewProc("CreateIconFromResourceEx")
+	procEnumDisplayMonitors      = user32DLL.NewProc("EnumDisplayMonitors")
+	procGetMonitorInfoW          = user32DLL.NewProc("GetMonitorInfoW")
 )
 
 type winPoint struct{ X, Y int32 }
 type winRect struct{ Left, Top, Right, Bottom int32 }
+
+type monitorInfoEx struct {
+	cbSize    uint32
+	rcMonitor winRect
+	rcWork    winRect
+	dwFlags   uint32
+}
+
+type displayMonitor struct {
+	Rect      winRect
+	IsPrimary bool
+}
+
+func getMonitors() []displayMonitor {
+	var monitors []displayMonitor
+
+	callback := syscall.NewCallback(func(hMonitor, hdc, lprcMonitor, dwData uintptr) uintptr {
+		var mi monitorInfoEx
+		mi.cbSize = uint32(unsafe.Sizeof(mi))
+		ret, _, _ := procGetMonitorInfoW.Call(hMonitor, uintptr(unsafe.Pointer(&mi)))
+		if ret == 0 {
+			return 0
+		}
+		ptr := (*[]displayMonitor)(unsafe.Pointer(dwData))
+		*ptr = append(*ptr, displayMonitor{
+			Rect:      mi.rcMonitor,
+			IsPrimary: mi.dwFlags&1 != 0,
+		})
+		return 1
+	})
+
+	procEnumDisplayMonitors.Call(0, 0, callback, uintptr(unsafe.Pointer(&monitors)))
+	return monitors
+}
 
 type App struct {
 	ctx      context.Context
@@ -150,16 +186,27 @@ func (a *App) startup(ctx context.Context) {
 	}
 	a.cfg = cfg
 
+	monitors := getMonitors()
+	if len(monitors) >= 2 {
+		for _, m := range monitors {
+			if !m.IsPrimary {
+				runtime.WindowSetPosition(ctx, int(m.Rect.Left), int(m.Rect.Top))
+				break
+			}
+		}
+	}
 	runtime.WindowFullscreen(ctx)
 	a.fullscreen = true
 
 	if a.cfg.LHM.Enabled == "true" {
-		collector.EnsureDriverLoaded(a.cfg.LHM.LHMExe)
-		bridgeExe := a.cfg.LHM.BridgeExe
-		if bridgeExe == "" {
-			bridgeExe = "lhm\\sensor_bridge.exe"
-		}
-		collector.StartBridge(bridgeExe)
+		go func() {
+			collector.EnsureDriverLoaded(a.cfg.LHM.LHMExe)
+			bridgeExe := a.cfg.LHM.BridgeExe
+			if bridgeExe == "" {
+				bridgeExe = "lhm\\sensor_bridge.exe"
+			}
+			collector.StartBridge(bridgeExe)
+		}()
 	}
 
 	go a.setWindowIcon()
@@ -300,12 +347,13 @@ func (a *App) buildDashboard() *model.DashboardData {
 		if bridgeExe == "" {
 			bridgeExe = "lhm\\sensor_bridge.exe"
 		}
-		bridge := collector.RunSensorBridge(bridgeExe)
+		bridge := collector.QueryBridgeIfAlive(bridgeExe)
 		if bridge != nil {
 			fans := collector.EnrichFromLHM(bridge, &d.CPU, &d.GPU, d.Storage)
 			if len(fans) > 0 {
 				d.Fans = fans
 			}
+			d.TotalPower = collector.TotalPowerFromLHM(bridge)
 		}
 	}
 

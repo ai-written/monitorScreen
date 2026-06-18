@@ -1,0 +1,128 @@
+name: Build & Release
+
+on:
+  push:
+    branches: [dev]
+    tags: ["v*"]
+  pull_request:
+    branches: [dev]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache-dependency-path: go.sum
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Wails CLI
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm ci
+          cd ..
+        shell: pwsh
+
+      - name: Build sensor bridge
+        run: |
+          if (Test-Path "lhm\LibreHardwareMonitorLib.dll") {
+            Write-Host "[INFO] Building sensor bridge..."
+            & .\build_bridge.bat
+          } else {
+            Write-Host "[WARN] lhm\LibreHardwareMonitorLib.dll not found, skipping bridge build"
+          }
+        shell: pwsh
+
+      - name: Generate app manifest
+        run: |
+          New-Item -ItemType Directory -Path "build\windows" -Force | Out-Null
+          if (Test-Path "icon.ico") { Copy-Item "icon.ico" "build\windows\icon.ico" -Force }
+          @'
+          <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+          <assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3">
+              <assemblyIdentity type="win32" name="com.wails.{{.Name}}" version="{{.Info.ProductVersion}}.0" processorArchitecture="*"/>
+              <dependency>
+                  <dependentAssembly>
+                      <assemblyIdentity type="win32" name="Microsoft.Windows.Common-Controls" version="6.0.0.0" processorArchitecture="*" publicKeyToken="6595b64144ccf1df" language="*"/>
+                  </dependentAssembly>
+              </dependency>
+              <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
+                  <security>
+                      <requestedPrivileges>
+                          <requestedExecutionLevel level="requireAdministrator" uiAccess="false"/>
+                      </requestedPrivileges>
+                  </security>
+              </trustInfo>
+              <asmv3:application>
+                  <asmv3:windowsSettings>
+                      <dpiAware xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">true/pm</dpiAware>
+                      <dpiAwareness xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">permonitorv2,permonitor</dpiAwareness>
+                  </asmv3:windowsSettings>
+              </asmv3:application>
+          </assembly>
+          '@ | Out-File -FilePath "build\windows\wails.exe.manifest" -Encoding utf8
+        shell: pwsh
+
+      - name: Wails build
+        run: wails build -ldflags="-s -w"
+
+      - name: Package output
+        run: |
+          $outDir = "build\bin"
+          New-Item -ItemType Directory -Path $outDir -Force | Out-Null
+          Copy-Item "config.yaml" $outDir
+          if (Test-Path "lhm") {
+            Copy-Item "lhm" "$outDir\lhm\" -Recurse -Force
+          }
+          $tag = git describe --tags --always --dirty 2>$null
+          if (-not $tag) { $tag = "dev" }
+          $tag | Out-File -FilePath "$outDir\VERSION.txt" -Encoding utf8
+        shell: pwsh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: monitorScreen-${{ github.ref_name }}
+          path: build\bin\
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: monitorScreen-${{ github.ref_name }}
+          path: pkg
+
+      - name: Create zip
+        run: |
+          cd pkg
+          zip -r "../monitorScreen-${{ github.ref_name }}.zip" .
+          cd ..
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          files: monitorScreen-${{ github.ref_name }}.zip
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

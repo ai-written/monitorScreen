@@ -19,5 +19,5 @@ if %ERRORLEVEL% neq 0 (
     exit /b 1
 )
 
-echo Done: sensor_bridge.exe (HTTP server on port 8086)
+echo Done: sensor_bridge.exe (HTTP server on port 16533)
 exit /b 0

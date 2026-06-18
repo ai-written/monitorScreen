@@ -10,6 +10,7 @@ import (
 type Config struct {
 	Collector CollectorConfig `yaml:"collector"`
 	LHM       LHMConfig       `yaml:"lhm"`
+	Update    UpdateConfig    `yaml:"update"`
 }
 
 type CollectorConfig struct {
@@ -20,6 +21,11 @@ type LHMConfig struct {
 	Enabled   string `yaml:"enabled"`
 	BridgeExe string `yaml:"bridge_exe"`
 	LHMExe    string `yaml:"lhm_exe"`
+}
+
+type UpdateConfig struct {
+	Enabled string `yaml:"enabled"`
+	Repo    string `yaml:"repo"`
 }
 
 type DashboardData struct {

@@ -72,7 +72,7 @@ echo     ^</asmv3:application^>
 echo ^</assembly^>
 ) > "build\windows\wails.exe.manifest"
 
-wails build -ldflags="-s -w"
+wails build -ldflags="-s -w -X main.version=dev"
 
 echo.
 echo Copying files to output directory...

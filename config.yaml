@@ -5,3 +5,7 @@ lhm:
   enabled: "true"
   bridge_exe: 'lhm\sensor_bridge.exe'
   lhm_exe: 'lhm\LibreHardwareMonitor.exe'
+
+update:
+  enabled: "true"
+  repo: "ai-written/monitorScreen"

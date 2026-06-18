@@ -14,7 +14,7 @@
       </template>
     </div>
     <div class="metrics-grid">
-      <MetricCard label="封装温度" :value="cpu.package_temp" unit="°C" :max="100" bar-color="var(--cyan)" :show-zero="false" />
+      <MetricCard label="CPU 温度" :value="cpu.package_temp" unit="°C" :max="100" bar-color="var(--cyan)" :show-zero="false" />
       <MetricCard label="CPU 使用率" :value="cpu.usage" unit="%" :max="100" bar-color="var(--cyan)" />
       <MetricCard label="主频" :value="cpu.clock_speed" unit="MHz" :max="6000" bar-color="var(--cyan)" />
       <MetricCard label="核心电压" :value="cpu.vcore" unit="V" :max="2" bar-color="var(--cyan)" :decimals="3" :show-zero="false" />

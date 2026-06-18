@@ -7,7 +7,7 @@ using LibreHardwareMonitor.Hardware;
 class SensorBridge
 {
     static Computer computer;
-    static int port = 8086;
+    static int port = 16533;
 
     static void Main(string[] args)
     {

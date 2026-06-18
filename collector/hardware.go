@@ -124,7 +124,7 @@ func isBridgeAlive() bool {
 	if bridgeProcess == nil {
 		return false
 	}
-	resp, err := http.Get("http://127.0.0.1:8086/")
+	resp, err := http.Get("http://127.0.0.1:16533/")
 	if err != nil {
 		return false
 	}
@@ -142,7 +142,7 @@ func QueryBridgeIfAlive(exePath string) *BridgeOutput {
 
 func queryBridge() *BridgeOutput {
 	client := http.Client{Timeout: 5 * time.Second}
-	resp, err := client.Get("http://127.0.0.1:8086/")
+	resp, err := client.Get("http://127.0.0.1:16533/")
 	if err != nil {
 		log.Printf("bridge: HTTP query failed: %v", err)
 		return nil

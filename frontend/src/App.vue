@@ -1,5 +1,8 @@
 <template>
   <div class="app" @keydown.esc="onEsc" tabindex="0">
+    <div class="update-bar" v-if="updateInfo.has_update" @click="doUpdate">
+      发现新版本 {{ updateInfo.latest }} — 当前 {{ updateInfo.current }}，点击下载
+    </div>
     <TopBar :system="data.system" :cpu="data.cpu" :gpu="data.gpu" :memory="data.memory" :total-power="data.total_power" :network="data.network" />
     <div class="main-grid">
       <CpuBlock :cpu="data.cpu" />
@@ -11,7 +14,7 @@
       <FansBlock :fans="data.fans" />
     </div>
     <div class="overlay-btns">
-      <div class="overlay-btn" @click="toggleFs" :title="fullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'">
+      <div class="overlay-btn" @click="toggleFs" :title="fullscreen ? '退出全屏' : '全屏'">
         <svg v-if="fullscreen" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M8 3v3a2 2 0 01-2 2H3m18 0h-3a2 2 0 01-2-2V3m0 18v-3a2 2 0 012-2h3M3 16h3a2 2 0 012 2v3"/>
         </svg>
@@ -19,7 +22,7 @@
           <path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/>
         </svg>
       </div>
-      <div class="overlay-btn" @click="doShutdown" title="Shutdown">
+      <div class="overlay-btn" @click="doShutdown" title="关闭">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M18 6L6 18M6 6l12 12"/>
         </svg>
@@ -53,6 +56,7 @@ export default {
     })
 
     const fullscreen = ref(true)
+    const updateInfo = reactive({ has_update: false, latest: '', current: '', download_url: '' })
     let eventCleanup = null
     let clockTimer = null
     let fpsTimer = null
@@ -119,6 +123,16 @@ export default {
       }
 
       document.addEventListener('keydown', handleKey)
+
+      try {
+        const info = await window.go.main.App.CheckUpdate()
+        if (info && info.has_update) {
+          updateInfo.has_update = info.has_update
+          updateInfo.latest = info.latest
+          updateInfo.current = info.current
+          updateInfo.download_url = info.download_url
+        }
+      } catch (e) { /* ignore */ }
     })
 
     onUnmounted(() => {
@@ -145,9 +159,15 @@ export default {
       try { await window.go.main.App.Shutdown() } catch (e) { /* ignore */ }
     }
 
+    async function doUpdate() {
+      if (updateInfo.download_url) {
+        try { await window.go.main.App.OpenURL(updateInfo.download_url) } catch (e) { /* ignore */ }
+      }
+    }
+
     function onEsc() {}
 
-    return { data, fullscreen, toggleFs, doShutdown, onEsc }
+    return { data, fullscreen, updateInfo, toggleFs, doShutdown, doUpdate, onEsc }
   }
 }
 </script>
@@ -159,6 +179,23 @@ export default {
   flex-direction: column;
   padding: 12px 16px;
   gap: 10px;
+}
+
+.update-bar {
+  background: linear-gradient(90deg, var(--amber-dim), rgba(245, 158, 11, 0.25));
+  border: 1px solid var(--amber);
+  border-radius: 8px;
+  color: var(--amber);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  padding: 8px 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity 0.2s;
+}
+.update-bar:hover {
+  opacity: 0.85;
 }
 
 .main-grid {

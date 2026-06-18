@@ -78,7 +78,8 @@ jobs:
         shell: pwsh
 
       - name: Wails build
-        run: wails build -ldflags="-s -w"
+        run: wails build -ldflags="-s -w -X main.version=${{ github.ref_name }}"
+        shell: pwsh
 
       - name: Package output
         run: |

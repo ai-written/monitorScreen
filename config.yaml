@@ -9,3 +9,7 @@ lhm:
 update:
   enabled: "true"
   repo: "ai-written/monitorScreen"
+
+background:
+  image: ""
+  opacity: 0.5

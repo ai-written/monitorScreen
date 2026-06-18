@@ -1,7 +1,9 @@
 <template>
+  <video v-if="bgVideo" class="bg-video" :src="bgVideo" autoplay loop muted playsinline></video>
   <div class="app" @keydown.esc="onEsc" tabindex="0">
-    <div class="update-bar" v-if="updateInfo.has_update" @click="doUpdate">
-      发现新版本 {{ updateInfo.latest }} — 当前 {{ updateInfo.current }}，点击下载
+    <div class="update-bar" v-if="updateInfo.has_update && !updateDismissed">
+      <span class="update-bar-text" @click="doUpdate">发现新版本 {{ updateInfo.latest }} — 当前 {{ updateInfo.current }}，点击下载</span>
+      <span class="update-bar-close" @click.stop="updateDismissed = true">&times;</span>
     </div>
     <TopBar :system="data.system" :cpu="data.cpu" :gpu="data.gpu" :memory="data.memory" :total-power="data.total_power" :network="data.network" />
     <div class="main-grid">
@@ -57,6 +59,8 @@ export default {
 
     const fullscreen = ref(true)
     const updateInfo = reactive({ has_update: false, latest: '', current: '', download_url: '' })
+    const updateDismissed = ref(false)
+    const bgVideo = ref('')
     let eventCleanup = null
     let clockTimer = null
     let fpsTimer = null
@@ -124,15 +128,29 @@ export default {
 
       document.addEventListener('keydown', handleKey)
 
-      try {
-        const info = await window.go.main.App.CheckUpdate()
+      window.go.main.App.CheckUpdate().then(info => {
         if (info && info.has_update) {
           updateInfo.has_update = info.has_update
           updateInfo.latest = info.latest
           updateInfo.current = info.current
           updateInfo.download_url = info.download_url
         }
-      } catch (e) { /* ignore */ }
+      }).catch(() => {})
+
+      window.go.main.App.GetBackgroundImage().then(bg => {
+        if (bg && bg.data_uri) {
+          if (bg.type === 'video') {
+            bgVideo.value = bg.data_uri
+          } else {
+            document.body.style.backgroundImage = `url(${bg.data_uri})`
+            document.body.style.backgroundSize = 'cover'
+            document.body.style.backgroundPosition = 'center'
+            document.body.style.backgroundAttachment = 'fixed'
+          }
+          document.body.style.setProperty('--bg-opacity', bg.opacity || 0.3)
+          document.body.classList.add('has-bg')
+        }
+      }).catch(() => {})
     })
 
     onUnmounted(() => {
@@ -167,7 +185,7 @@ export default {
 
     function onEsc() {}
 
-    return { data, fullscreen, updateInfo, toggleFs, doShutdown, doUpdate, onEsc }
+    return { data, fullscreen, updateInfo, updateDismissed, bgVideo, toggleFs, doShutdown, doUpdate, onEsc }
   }
 }
 </script>
@@ -190,12 +208,30 @@ export default {
   font-weight: 600;
   text-align: center;
   padding: 8px 16px;
-  cursor: pointer;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.update-bar-text {
+  cursor: pointer;
   transition: opacity 0.2s;
 }
-.update-bar:hover {
+.update-bar-text:hover {
   opacity: 0.85;
+}
+.update-bar-close {
+  position: absolute;
+  right: 10px;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+.update-bar-close:hover {
+  opacity: 1;
 }
 
 .main-grid {

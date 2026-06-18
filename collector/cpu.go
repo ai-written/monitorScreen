@@ -38,7 +38,7 @@ func CollectCPU(prevUsage *float64) model.CPUData {
 		d.CoresThreads = fmt.Sprintf("%dC / %dT", physical, logical)
 	}
 
-	percentages, err := cpu.Percent(time.Second, false)
+	percentages, err := cpu.Percent(500*time.Millisecond, false)
 	if err == nil && len(percentages) > 0 {
 		d.Usage = percentages[0]
 		if prevUsage != nil {

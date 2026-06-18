@@ -28,6 +28,37 @@ body {
   background: var(--bg);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
+  position: relative;
 }
 
-#app { height: 100%; }
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  opacity: calc(1 - var(--bg-opacity, 0));
+  z-index: -1;
+  pointer-events: none;
+}
+
+body.has-bg {
+  --bg-card: rgba(12, 17, 25, 0.65);
+  --border: rgba(26, 34, 51, 0.45);
+  --cyan-dim: rgba(0, 212, 170, 0.08);
+  --purple-dim: rgba(167, 139, 250, 0.08);
+  --green-dim: rgba(52, 211, 153, 0.08);
+  --amber-dim: rgba(245, 158, 11, 0.08);
+  --pink-dim: rgba(244, 114, 182, 0.08);
+}
+
+#app { height: 100%; position: relative; z-index: 1; }
+
+.bg-video {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
+  pointer-events: none;
+}

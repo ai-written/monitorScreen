@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"sync"
 	"syscall"
+	"time"
 	"unsafe"
 
 	"github.com/shirou/gopsutil/v3/process"
@@ -62,7 +63,7 @@ func localIP() string {
 }
 
 func preferredOutboundIP() string {
-	conn, err := net.Dial("udp", "8.8.8.8:53")
+	conn, err := net.DialTimeout("udp", "8.8.8.8:53", 2*time.Second)
 	if err != nil {
 		return ""
 	}

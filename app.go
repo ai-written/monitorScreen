@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	_ "embed"
 	"encoding/json"
 	"fmt"
@@ -490,6 +491,9 @@ func defaultConfig() *model.Config {
 		Update: model.UpdateConfig{
 			Enabled: "false",
 		},
+		Background: model.BackgroundConfig{
+			Opacity: 0.3,
+		},
 	}
 }
 
@@ -566,7 +570,7 @@ func (a *App) CheckUpdate() updateInfo {
 
 func isNewer(latest, current string) bool {
 	if current == "dev" {
-		return latest != ""
+		return false
 	}
 	lp := parseVersion(latest)
 	cp := parseVersion(current)
@@ -596,4 +600,59 @@ func (a *App) OpenURL(url string) {
 	if a.ctx != nil {
 		runtime.BrowserOpenURL(a.ctx, url)
 	}
+}
+
+type backgroundResult struct {
+	Type    string  `json:"type"`
+	DataURI string  `json:"data_uri"`
+	Opacity float64 `json:"opacity"`
+}
+
+func (a *App) GetBackgroundImage() backgroundResult {
+	res := backgroundResult{Opacity: 0.3}
+
+	if a.cfg == nil || a.cfg.Background.Image == "" {
+		return res
+	}
+
+	ext := strings.ToLower(filepath.Ext(a.cfg.Background.Image))
+	if isVideoExt(ext) {
+		absPath, err := filepath.Abs(a.cfg.Background.Image)
+		if err != nil {
+			log.Printf("background: cannot resolve path: %v", err)
+			return res
+		}
+		res.Type = "video"
+		res.DataURI = "file:///" + strings.ReplaceAll(absPath, "\\", "/")
+	} else {
+		data, err := os.ReadFile(a.cfg.Background.Image)
+		if err != nil {
+			log.Printf("background: cannot read %s: %v", a.cfg.Background.Image, err)
+			return res
+		}
+		mime := http.DetectContentType(data)
+		b64 := base64.StdEncoding.EncodeToString(data)
+		res.Type = "image"
+		res.DataURI = "data:" + mime + ";base64," + b64
+	}
+
+	if a.cfg.Background.Opacity > 0 {
+		res.Opacity = a.cfg.Background.Opacity
+	}
+	if res.Opacity > 1 {
+		res.Opacity = 1
+	}
+	if res.Opacity < 0 {
+		res.Opacity = 0.3
+	}
+
+	return res
+}
+
+func isVideoExt(ext string) bool {
+	switch ext {
+	case ".mp4", ".webm", ".avi", ".mov", ".mkv", ".ogv":
+		return true
+	}
+	return false
 }

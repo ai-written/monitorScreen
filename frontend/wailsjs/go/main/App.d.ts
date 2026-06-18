@@ -11,6 +11,8 @@ export function DragMove(arg1:number,arg2:number):Promise<void>;
 
 export function DragStart(arg1:number,arg2:number):Promise<void>;
 
+export function GetBackgroundImage():Promise<main.backgroundResult>;
+
 export function GetDashboard():Promise<model.DashboardData>;
 
 export function GetIsFullscreen():Promise<boolean>;

@@ -1,5 +1,21 @@
 export namespace main {
 	
+	export class backgroundResult {
+	    type: string;
+	    data_uri: string;
+	    opacity: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new backgroundResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.type = source["type"];
+	        this.data_uri = source["data_uri"];
+	        this.opacity = source["opacity"];
+	    }
+	}
 	export class updateInfo {
 	    has_update: boolean;
 	    latest: string;

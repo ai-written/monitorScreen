@@ -18,6 +18,10 @@ export function DragStart(arg1, arg2) {
   return window['go']['main']['App']['DragStart'](arg1, arg2);
 }
 
+export function GetBackgroundImage() {
+  return window['go']['main']['App']['GetBackgroundImage']();
+}
+
 export function GetDashboard() {
   return window['go']['main']['App']['GetDashboard']();
 }

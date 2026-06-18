@@ -8,9 +8,10 @@ import (
 )
 
 type Config struct {
-	Collector CollectorConfig `yaml:"collector"`
-	LHM       LHMConfig       `yaml:"lhm"`
-	Update    UpdateConfig    `yaml:"update"`
+	Collector  CollectorConfig  `yaml:"collector"`
+	LHM        LHMConfig        `yaml:"lhm"`
+	Update     UpdateConfig     `yaml:"update"`
+	Background BackgroundConfig `yaml:"background"`
 }
 
 type CollectorConfig struct {
@@ -26,6 +27,11 @@ type LHMConfig struct {
 type UpdateConfig struct {
 	Enabled string `yaml:"enabled"`
 	Repo    string `yaml:"repo"`
+}
+
+type BackgroundConfig struct {
+	Image   string  `yaml:"image"`
+	Opacity float64 `yaml:"opacity"`
 }
 
 type DashboardData struct {

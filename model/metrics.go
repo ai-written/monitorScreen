@@ -1,6 +1,7 @@
 package model
 
 import (
+	"io"
 	"os"
 	"path/filepath"
 
@@ -93,6 +94,8 @@ type MemoryData struct {
 	Frequency string  `json:"frequency"`
 	Channel   string  `json:"channel"`
 	Brand     string  `json:"brand"`
+	SwapTotal float64 `json:"swap_total"`
+	SwapUsed  float64 `json:"swap_used"`
 }
 
 type StorageDrive struct {
@@ -128,8 +131,23 @@ func LoadConfig(path string) (*Config, error) {
 
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return nil, err
+		templatePath := filepath.Join(filepath.Dir(path), "config.example.yaml")
+		if tmpl, e := os.ReadFile(templatePath); e == nil {
+			if src, openErr := os.Open(templatePath); openErr == nil {
+				defer src.Close()
+				if dst, createErr := os.Create(path); createErr == nil {
+					defer dst.Close()
+					io.Copy(dst, src)
+				} else {
+					return nil, createErr
+				}
+			}
+			data = tmpl
+		} else {
+			return nil, err
+		}
 	}
+
 	var cfg Config
 	if err := yaml.Unmarshal(data, &cfg); err != nil {
 		return nil, err

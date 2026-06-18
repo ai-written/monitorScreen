@@ -85,7 +85,7 @@ jobs:
         run: |
           $outDir = "build\bin"
           New-Item -ItemType Directory -Path $outDir -Force | Out-Null
-          Copy-Item "config.yaml" $outDir
+          Copy-Item "config.example.yaml" $outDir
           if (Test-Path "lhm") {
             Copy-Item "lhm" "$outDir\lhm\" -Recurse -Force
           }

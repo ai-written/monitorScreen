@@ -87,7 +87,7 @@ if not exist "build\bin\monitorScreen.exe" (
 )
 
 if not exist "build\bin" mkdir "build\bin"
-copy /Y "config.yaml" "build\bin\config.yaml" >nul
+copy /Y "config.example.yaml" "build\bin\config.example.yaml" >nul
 
 if exist "lhm" (
     if not exist "build\bin\lhm" mkdir "build\bin\lhm"

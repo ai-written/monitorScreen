@@ -4,3 +4,4 @@ build
 node_modules
 monitor-screen.exe
 monitor-screen.log
+config.yaml

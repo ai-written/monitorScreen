@@ -148,6 +148,8 @@ export namespace model {
 	    frequency: string;
 	    channel: string;
 	    brand: string;
+	    swap_total: number;
+	    swap_used: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new MemoryData(source);
@@ -161,6 +163,8 @@ export namespace model {
 	        this.frequency = source["frequency"];
 	        this.channel = source["channel"];
 	        this.brand = source["brand"];
+	        this.swap_total = source["swap_total"];
+	        this.swap_used = source["swap_used"];
 	    }
 	}
 	export class GPUData {

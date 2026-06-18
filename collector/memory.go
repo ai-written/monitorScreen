@@ -17,6 +17,12 @@ func CollectMemory() model.MemoryData {
 		d.TotalGB = float64(v.Total) / (1024 * 1024 * 1024)
 	}
 
+	s, err := mem.SwapMemory()
+	if err == nil {
+		d.SwapTotal = float64(s.Total) / (1024 * 1024 * 1024)
+		d.SwapUsed = float64(s.Used) / (1024 * 1024 * 1024)
+	}
+
 	collectMemoryWMI(&d)
 
 	return d
@@ -78,11 +84,11 @@ func collectMemoryWMI(d *model.MemoryData) {
 
 		switch {
 		case len(chips) >= 4:
-			d.Channel = "Quad"
+			d.Channel = "四通道"
 		case len(chips) >= 2:
-			d.Channel = "Dual"
+			d.Channel = "双通道"
 		case len(chips) == 1:
-			d.Channel = "Single"
+			d.Channel = "单通道"
 		}
 	}
 }

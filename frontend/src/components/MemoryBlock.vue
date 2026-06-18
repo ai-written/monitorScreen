@@ -16,6 +16,9 @@
       <div class="spec" v-if="memory.frequency">{{ memory.frequency }}</div>
       <div class="spec" v-if="memory.channel">{{ memory.channel }}</div>
     </div>
+    <div class="swap-line" v-if="memory.swap_total > 0">
+      虚拟内存 {{ fmt(memory.swap_used) }} / {{ fmt(memory.swap_total) }} GB
+    </div>
   </div>
 </template>
 
@@ -79,4 +82,11 @@ export default {
   font-size: 13px; color: var(--text-secondary);
   background: var(--green-dim); padding: 3px 10px; border-radius: 6px;
 }
+
+.swap-line {
+  font-size: 13px; color: var(--text-secondary);
+  margin-top: 10px;
+}
+
+.swap-line + .swap-line { margin-top: 2px; }
 </style>

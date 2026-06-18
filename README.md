@@ -8,14 +8,16 @@ Windows 副屏硬件监控工具，在第二块屏幕上全屏展示实时系统
 
 ## 功能
 
-- **CPU** — 型号、频率、核心/线程数、L3 缓存、封装温度、使用率、主频、核心电压、主板温度、VRM 温度、风扇转速、功耗、逐核心使用率
-- **GPU** — 型号、显存规格、温度、使用率、频率、显存占用、风扇转速、功耗 (via nvidia-smi)
+- **CPU** — 型号、频率、核心/线程数、L3 缓存、温度、使用率、主频、核心电压、主板温度、VRM 温度、风扇转速、功耗、逐核心使用率
+- **GPU** — 型号、显存规格、显存使用率(%)、温度、使用率、频率、显存占用、风扇转速、功耗 (via nvidia-smi)
 - **内存** — 已用/总量、类型、频率、通道、品牌
-- **存储** — 各分区容量/温度 + 实时 IO 读写速率
+- **存储** — 各分区容量/温度 + 实时 IO 读写速率 (MB/s)
 - **风扇** — 各风扇 RPM 及百分比
-- **网络** — 实时下载/上传速率、TCP 活跃连接数
+- **网络** — 实时下载/上传速率 (Mbps)、TCP 活跃连接数
 - **系统** — 时钟、日期、运行时间、进程数、线程数、IP 地址、显示器分辨率/刷新率、UI 帧率
 - **功耗** — 整机总功耗估算 (via LibreHardwareMonitor)
+- **自动更新** — 启动时检查 GitHub Release，有新版本提示下载
+- **自定义背景** — 支持图片 / 视频作为背景，透明度可配置
 
 ## 技术栈
 
@@ -38,7 +40,7 @@ Windows 副屏硬件监控工具，在第二块屏幕上全屏展示实时系统
 ├── main.go              # Wails 入口
 ├── app.go               # 核心逻辑、数据采集调度、窗口管理
 ├── tray.go              # 系统托盘
-├── config.yaml          # 配置文件
+├── config.example.yaml  # 配置模板（首次运行自动生成 config.yaml）
 ├── model/               # 数据模型
 ├── collector/           # 数据采集器 (CPU/GPU/内存/磁盘/网络/系统)
 ├── lhm_bridge.cs        # LibreHardwareMonitor HTTP 桥接 (C#)
@@ -51,6 +53,7 @@ Windows 副屏硬件监控工具，在第二块屏幕上全屏展示实时系统
 ├── build_bridge.bat     # 编译 sensor_bridge.exe
 ├── setup_lhm.ps1        # 在线下载 LHM
 ├── setup_lhm_local.ps1  # 离线安装 LHM
+├── .github/workflows/   # GitHub Actions 自动构建
 └── lhm/                 # LHM 运行时文件 (构建后自动生成)
 ```
 
@@ -70,6 +73,8 @@ Windows 副屏硬件监控工具，在第二块屏幕上全屏展示实时系统
 
 ### 2. 修改配置
 
+**首次运行**时，程序会自动从 `config.example.yaml` 复制一份 `config.yaml`，后续更新不会覆盖你的配置文件。
+
 编辑 `config.yaml`：
 
 ```yaml
@@ -80,6 +85,14 @@ lhm:
   enabled: "true"                     # 启用硬件传感器
   bridge_exe: 'lhm\sensor_bridge.exe'
   lhm_exe: 'lhm\LibreHardwareMonitor.exe'
+
+update:
+  enabled: "true"                     # 自动检查更新
+  repo: "your-username/monitorScreen" # GitHub 仓库 (owner/name)
+
+background:
+  image: ""                           # 背景图/视频路径，空则不启用
+  opacity: 0.5                        # 背景透明度 (0~1, 越小越透)
 ```
 
 不使用硬件传感器时将 `lhm.enabled` 设为 `"false"`，此时 CPU 温度、风扇转速、功耗等数据将显示 `--`。
@@ -112,6 +125,18 @@ wails build -ldflags="-s -w"
 - 按 `Esc` 退出/进入全屏
 - 右上角按钮：切换全屏 / 退出程序
 - 系统托盘右键菜单：显示窗口 / 关闭
+- 有新版本时顶部显示黄色提示条，点击下载，可手动关闭
+
+## 自动构建
+
+推送 `v` 开头 tag 到 GitHub 自动触发构建并发布 Release：
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+也可在 Actions 页面手动触发 `workflow_dispatch`。
 
 ## 工作原理
 
@@ -130,13 +155,19 @@ monitorScreen.exe (管理员权限)
 ## 常见问题
 
 **Q: 打开后所有数据都显示 `--`？**  
-A: 确认 `config.yaml` 与 exe 在同一目录。检查 `lhm/` 目录下的 `sensor_bridge.exe` 和 `LibreHardwareMonitorLib.dll` 是否存在。硬件传感器数据需要管理员权限才能获取。
+A: 确认 `config.yaml` 与 exe 在同一目录（首次运行会自动从 `config.example.yaml` 生成）。检查 `lhm/` 目录下的 `sensor_bridge.exe` 和 `LibreHardwareMonitorLib.dll` 是否存在。硬件传感器数据需要管理员权限才能获取。
+
+**Q: 更新后 config.yaml 被覆盖了？**  
+A: 不会。发布包内含 `config.example.yaml` 模板，`config.yaml` 首次运行自动生成，后续更新不会覆盖。
 
 **Q: IP 地址显示不对？**  
-A: 程序通过 UDP 连接到 `8.8.8.8` 来判断实际使用的网卡 IP，若断网则回退到第一个非回环 IPv4。
+A: 程序通过 UDP 连接到 `8.8.8.8`（2s 超时）来判断实际使用的网卡 IP，若断网则回退到第一个非回环 IPv4。
 
 **Q: UI FPS 很低？**  
 A: UI FPS 是 WebView 渲染帧率，不是游戏帧率。放到副屏时可能受限于集成显卡性能。
+
+**Q: 如何设置背景图/视频？**  
+A: `config.yaml` 中设置 `background.image` 为本地文件路径，支持 `png/jpg/webp` 图片和 `mp4/webm/avi/mov/mkv` 视频。视频自动循环静音播放。
 
 ## License
 

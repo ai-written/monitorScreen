@@ -9,10 +9,12 @@ import (
 )
 
 type Config struct {
-	Collector  CollectorConfig  `yaml:"collector"`
-	LHM        LHMConfig        `yaml:"lhm"`
-	Update     UpdateConfig     `yaml:"update"`
-	Background BackgroundConfig `yaml:"background"`
+	Collector   CollectorConfig  `yaml:"collector"`
+	LHM         LHMConfig        `yaml:"lhm"`
+	Update      UpdateConfig     `yaml:"update"`
+	Background  BackgroundConfig `yaml:"background"`
+	DesktopMode string           `yaml:"desktop_mode"`
+	Theme       string           `yaml:"theme"`
 }
 
 type CollectorConfig struct {
@@ -164,4 +166,16 @@ func exeDirectory() (string, error) {
 		return "", err
 	}
 	return filepath.Dir(exe), nil
+}
+
+func WriteConfig(name string, cfg *Config) error {
+	exeDir, err := exeDirectory()
+	if err == nil {
+		name = filepath.Join(exeDir, name)
+	}
+	data, err := yaml.Marshal(cfg)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(name, data, 0644)
 }

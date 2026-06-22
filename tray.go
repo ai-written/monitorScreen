@@ -14,9 +14,9 @@ func (a *App) runSystray() {
 		systray.SetIcon(trayIcon)
 		systray.SetTooltip("Monitor Screen")
 
-		mShow := systray.AddMenuItem("Show", "Show window")
+		mShow := systray.AddMenuItem("显示窗口", "Show window")
 		systray.AddSeparator()
-		mQuit := systray.AddMenuItem("Quit", "Exit application")
+		mQuit := systray.AddMenuItem("退出", "Exit application")
 
 		go func() {
 			for {

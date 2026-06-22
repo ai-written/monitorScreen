@@ -21,6 +21,42 @@
   --red: #f87171;
 }
 
+html[data-theme="light"] {
+  --bg: #eef1f5;
+  --bg-card: #ffffff;
+  --border: #dce1e8;
+  --text-primary: #16181d;
+  --text-secondary: #54657a;
+  --text-dim: #8896aa;
+  --cyan: #009e80;
+  --cyan-dim: rgba(0, 158, 128, 0.1);
+  --purple: #7c6fe8;
+  --purple-dim: rgba(124, 111, 232, 0.1);
+  --green: #1da870;
+  --green-dim: rgba(29, 168, 112, 0.1);
+  --amber: #d97706;
+  --amber-dim: rgba(217, 119, 6, 0.1);
+  --pink: #e05d9d;
+  --pink-dim: rgba(224, 93, 157, 0.1);
+  --blue: #3b82f6;
+  --blue-dim: rgba(59, 130, 246, 0.1);
+  --red: #e05252;
+}
+
+html[data-theme="light"] body.has-bg {
+  --bg-card: rgba(255, 255, 255, 0.6);
+  --border: rgba(220, 225, 232, 0.4);
+  --cyan-dim: rgba(0, 158, 128, 0.05);
+  --purple-dim: rgba(124, 111, 232, 0.05);
+  --green-dim: rgba(29, 168, 112, 0.05);
+  --amber-dim: rgba(217, 119, 6, 0.05);
+  --pink-dim: rgba(224, 93, 157, 0.05);
+}
+
+html[data-theme="light"] body::before {
+  background: var(--bg);
+}
+
 html, body { height: 100%; overflow: hidden; }
 
 body {

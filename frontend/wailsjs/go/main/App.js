@@ -30,6 +30,10 @@ export function GetIsFullscreen() {
   return window['go']['main']['App']['GetIsFullscreen']();
 }
 
+export function GetTheme() {
+  return window['go']['main']['App']['GetTheme']();
+}
+
 export function GetVersion() {
   return window['go']['main']['App']['GetVersion']();
 }
@@ -40,6 +44,10 @@ export function OpenURL(arg1) {
 
 export function QuitApp() {
   return window['go']['main']['App']['QuitApp']();
+}
+
+export function SetTheme(arg1) {
+  return window['go']['main']['App']['SetTheme'](arg1);
 }
 
 export function ShowWindow() {

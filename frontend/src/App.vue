@@ -16,6 +16,14 @@
       <FansBlock :fans="data.fans" />
     </div>
     <div class="overlay-btns">
+      <div class="overlay-btn" @click="toggleTheme" :title="themeValue === 'light' ? '切换暗色主题' : '切换亮色主题'">
+        <svg v-if="themeValue === 'light'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+        </svg>
+        <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+      </div>
       <div class="overlay-btn" @click="toggleFs" :title="fullscreen ? '退出全屏' : '全屏'">
         <svg v-if="fullscreen" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M8 3v3a2 2 0 01-2 2H3m18 0h-3a2 2 0 01-2-2V3m0 18v-3a2 2 0 012-2h3M3 16h3a2 2 0 012 2v3"/>
@@ -61,6 +69,7 @@ export default {
     const updateInfo = reactive({ has_update: false, latest: '', current: '', download_url: '' })
     const updateDismissed = ref(false)
     const bgVideo = ref('')
+    const themeValue = ref('dark')
     let eventCleanup = null
     let clockTimer = null
     let fpsTimer = null
@@ -103,6 +112,18 @@ export default {
       updateClock()
       clockTimer = setInterval(updateClock, 1000)
       if (window.runtime) startFpsTracker()
+
+      try {
+        const t = await window.go.main.App.GetTheme()
+        if (t) { themeValue.value = t; applyTheme(t) }
+      } catch (e) { /* ignore */ }
+
+      if (window.runtime) {
+        window.runtime.EventsOn('theme-changed', (t) => {
+          themeValue.value = t
+          applyTheme(t)
+        })
+      }
 
       try {
         const d = await window.go.main.App.GetDashboard()
@@ -185,7 +206,16 @@ export default {
 
     function onEsc() {}
 
-    return { data, fullscreen, updateInfo, updateDismissed, bgVideo, toggleFs, doShutdown, doUpdate, onEsc }
+    function applyTheme(t) {
+      document.documentElement.setAttribute('data-theme', t)
+    }
+
+    async function toggleTheme() {
+      const next = themeValue.value === 'light' ? 'dark' : 'light'
+      try { await window.go.main.App.SetTheme(next) } catch (e) { /* ignore */ }
+    }
+
+    return { data, fullscreen, updateInfo, updateDismissed, bgVideo, themeValue, toggleFs, doShutdown, doUpdate, toggleTheme, onEsc }
   }
 }
 </script>

@@ -494,6 +494,7 @@ func defaultConfig() *model.Config {
 		Background: model.BackgroundConfig{
 			Opacity: 0.3,
 		},
+		Theme: "dark",
 	}
 }
 
@@ -599,6 +600,28 @@ func parseVersion(v string) [3]int {
 func (a *App) OpenURL(url string) {
 	if a.ctx != nil {
 		runtime.BrowserOpenURL(a.ctx, url)
+	}
+}
+
+func (a *App) GetTheme() string {
+	if a.cfg != nil && a.cfg.Theme == "light" {
+		return "light"
+	}
+	return "dark"
+}
+
+func (a *App) SetTheme(theme string) {
+	if theme != "dark" && theme != "light" {
+		return
+	}
+	a.mu.Lock()
+	a.cfg.Theme = theme
+	a.mu.Unlock()
+
+	model.WriteConfig("config.yaml", a.cfg)
+
+	if a.ctx != nil {
+		runtime.EventsEmit(a.ctx, "theme-changed", theme)
 	}
 }
 

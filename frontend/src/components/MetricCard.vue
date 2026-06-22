@@ -46,8 +46,8 @@ export default {
 
 <style scoped>
 .metric-card {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
   border-radius: 8px;
   padding: 8px 14px;
   display: flex;
@@ -90,7 +90,7 @@ export default {
 
 .progress-bar {
   height: 3px;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--border);
   border-radius: 2px;
   overflow: hidden;
 }

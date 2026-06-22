@@ -13,3 +13,5 @@ update:
 background:
   image: ""
   opacity: 0.5
+
+theme: "dark"
